@@ -1,1 +1,33 @@
-// TODO
+.banner {
+  width: 100%;
+  height: auto;
+}
+
+.post {
+  h1 {
+    font-style: normal;
+    font-weight: bold;
+    font-size: 48px;
+    line-height: 58px;
+    letter-spacing: -0.5px;
+    margin-bottom: 24px;
+  }
+}
+
+.dadosPost {
+  display: flex;
+  margin-bottom: 64px;
+
+  span {
+    display: flex;
+    align-items: center;
+    font-style: normal;
+    font-weight: normal;
+    font-size: 14px;
+    line-height: 17px;
+
+    & + span {
+      margin-left: 8px;
+    }
+  }
+}

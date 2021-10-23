@@ -1,6 +1,8 @@
 import { GetStaticPaths, GetStaticProps } from 'next';
 import { RichText } from 'prismic-dom';
-import { ReactNode } from 'react';
+import { ReactElement } from 'react';
+import { FiCalendar, FiClock, FiUser } from 'react-icons/fi';
+import Header from '../../components/Header';
 
 import { getPrismicClient } from '../../services/prismic';
 
@@ -28,10 +30,51 @@ interface PostProps {
   post: Post;
 }
 
-export default function Post({ post }: PostProps) {
+export default function Post({ post }: PostProps): ReactElement {
   // TODO
   console.log(post);
-  return <h1>post</h1>;
+  return (
+    <main>
+      <div className={commonStyles.container}>
+        <Header />
+      </div>
+      {post.data.banner.url && (
+        <img
+          src={post.data.banner.url}
+          alt={post.data.title}
+          className={styles.banner}
+        />
+      )}
+
+      <div className={commonStyles.container}>
+        <div className={styles.post}>
+          <h1>{post.data.title}</h1>
+
+          <div className={styles.dadosPost}>
+            <span>
+              <FiCalendar size={20} className={styles.icon} />
+              {post.first_publication_date}
+            </span>
+            <span>
+              <FiUser size={20} className={styles.icon} />
+              {post.data.author}
+            </span>
+            <span>
+              <FiClock size={20} className={styles.icon} />
+              Uns minutos
+            </span>
+          </div>
+
+          {post.data.content.heading}
+
+          <div
+            className=""
+            dangerouslySetInnerHTML={{ __html: post.data.content.body.text }}
+          />
+        </div>
+      </div>
+    </main>
+  );
 }
 
 export const getStaticPaths: GetStaticPaths = async () => {
