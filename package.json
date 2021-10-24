@@ -17,7 +17,8 @@
     "react": "17.0.1",
     "react-dom": "17.0.1",
     "react-icons": "^4.2.0",
-    "whatwg-fetch": "^3.6.2"
+    "whatwg-fetch": "^3.6.2",
+    "words-count": "^2.0.2"
   },
   "devDependencies": {
     "@testing-library/jest-dom": "^5.11.9",

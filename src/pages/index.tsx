@@ -1,4 +1,4 @@
-import { ReactNode, useState } from 'react';
+import { ReactNode, useEffect, useState } from 'react';
 import { GetStaticProps } from 'next';
 
 import Prismic from '@prismicio/client';
@@ -9,6 +9,7 @@ import { getPrismicClient } from '../services/prismic';
 import commonStyles from '../styles/common.module.scss';
 import styles from './home.module.scss';
 import Header from '../components/Header';
+import formatDate from '../utils/formatDate';
 
 interface Post {
   uid?: string;
@@ -31,13 +32,43 @@ interface HomeProps {
 }
 
 const Home = ({ postsPagination }: HomeProps): ReactNode => {
-  const [newPosts, setNewPosts] = useState<Post[]>([]);
+  const [posts, setPosts] = useState<PostPagination>({
+    next_page: null,
+    results: [],
+  });
 
   const handleFetchNextPage = async (): Promise<void> => {
     const data = await fetch(postsPagination.next_page).then(res => res.json());
 
-    console.log(data);
+    // console.log(data);
+
+    const newPosts: Post[] = data.results.map(post => {
+      return {
+        uid: post.uid,
+        slug: post.slugs,
+        first_publication_date: post.first_publication_date,
+        data: {
+          title: post.data.title,
+          subtitle: post.data.subtitle,
+          author: post.data.author,
+        },
+      };
+    });
+
+    const results = [...postsPagination.results, ...newPosts];
+    const { next_page } = data;
+    // setPosts({ next_page, results });
+
+    postsPagination = {
+      results,
+      next_page,
+    };
+    console.log(postsPagination);
   };
+
+  // useEffect(() => {
+  //   setPosts(postsPagination);
+  // }, [postsPagination]);
 
   return (
     <main className={commonStyles.container}>
@@ -51,11 +82,11 @@ const Home = ({ postsPagination }: HomeProps): ReactNode => {
               <p>{post.data.subtitle}</p>
               <div>
                 <span>
-                  <FiCalendar size={20} className={styles.icon} />
-                  {post.first_publication_date}
+                  <FiCalendar size={20} style={{ marginRight: '8px' }} />
+                  {formatDate(post.first_publication_date)}
                 </span>
                 <span>
-                  <FiUser size={20} className={styles.icon} />
+                  <FiUser size={20} style={{ marginRight: '8px' }} />
                   {post.data.author}
                 </span>
               </div>
@@ -83,17 +114,16 @@ export const getStaticProps: GetStaticProps = async () => {
     [Prismic.Predicates.at('document.type', 'posts')],
     {
       fetch: ['posts.title', 'posts.uid', 'posts.subtitle', 'posts.author'],
-      pageSize: 2,
+      pageSize: 1,
     }
   );
 
   // console.log(postsResponse);
 
   const results = postsResponse.results.map(post => {
-    console.log(post.slugs[0]);
     return {
       uid: post.uid,
-      slug: post.slugs[0],
+      slug: post.slugs,
       first_publication_date: post.first_publication_date,
       data: {
         title: post.data.title,
