@@ -17,6 +17,7 @@ import Comments from '../../components/Comments';
 
 interface Post {
   first_publication_date: string | null;
+  last_publication_date: string | null;
   data: {
     title: string;
     banner: {
@@ -89,7 +90,10 @@ export default function Post({
               <div className={styles.dadosPost}>
                 <span>
                   <FiCalendar size={20} style={{ marginRight: '8px' }} />
-                  {formatDate(post.first_publication_date)}
+                  {formatDate(
+                    post.first_publication_date,
+                    post.last_publication_date
+                  )}
                 </span>
                 <span>
                   <FiUser size={20} style={{ marginRight: '8px' }} />
@@ -211,6 +215,7 @@ export const getStaticProps: GetStaticProps = async context => {
 
   const post: Post = {
     first_publication_date: res.first_publication_date,
+    last_publication_date: res.last_publication_date,
     data: {
       title: res.data.title,
       banner: {
