@@ -15,6 +15,8 @@ class MyDocument extends Document {
   }
 
   render() {
+    const repoName = 'desafiosrocketseat';
+
     return (
       <Html>
         <Head>
@@ -27,6 +29,11 @@ class MyDocument extends Document {
           <link
             href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap"
             rel="stylesheet"
+          />
+          <script
+            async
+            defer
+            src={`//static.cdn.prismic.io/prismic.js?repo=${repoName}&new=true`}
           />
         </Head>
         <body>

@@ -48,3 +48,20 @@
     margin-top: 48px;
   }
 }
+
+.postLinks {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-top: 1em;
+
+  .postTitle {
+    color: var(--heading);
+    margin-bottom: 0.5em;
+  }
+
+  .description {
+    color: var(--highlight);
+    font-size: small;
+  }
+}

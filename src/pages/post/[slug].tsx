@@ -5,6 +5,7 @@ import { FiCalendar, FiClock, FiUser } from 'react-icons/fi';
 import wordsCount from 'words-count';
 import Prismic from '@prismicio/client';
 import { useRouter } from 'next/router';
+import Link from 'next/link';
 import Header from '../../components/Header';
 
 import { getPrismicClient } from '../../services/prismic';
@@ -12,6 +13,7 @@ import { getPrismicClient } from '../../services/prismic';
 import commonStyles from '../../styles/common.module.scss';
 import formatDate from '../../utils/formatDate';
 import styles from './post.module.scss';
+import Comments from '../../components/Comments';
 
 interface Post {
   first_publication_date: string | null;
@@ -32,10 +34,19 @@ interface Post {
 
 interface PostProps {
   post: Post;
+  prevPost;
+  nextPost;
 }
 
-export default function Post({ post }: PostProps): ReactElement {
+export default function Post({
+  post,
+  prevPost,
+  nextPost,
+}: PostProps): ReactElement {
   const router = useRouter();
+  // const { slug } = router.query;
+  // const utterances = useUtterances(String(slug));
+  // console.log(utterances);
   const [words, setWords] = useState('');
   const postRef = useRef<HTMLDivElement>();
   // TODO
@@ -103,6 +114,41 @@ export default function Post({ post }: PostProps): ReactElement {
                 </div>
               ))}
             </div>
+
+            <hr />
+
+            <div className={styles.postLinks}>
+              <div>
+                {!!prevPost && (
+                  <Link href={`/post/${prevPost.uid}`} passHref>
+                    <a>
+                      <div>
+                        <p className={styles.postTitle}>
+                          {prevPost.data.title}
+                        </p>
+                        <p className={styles.description}>Post anterior</p>
+                      </div>
+                    </a>
+                  </Link>
+                )}
+              </div>
+              <div>
+                {!!nextPost && (
+                  <Link href={`/post/${nextPost.uid}`} passHref>
+                    <a>
+                      <div>
+                        <p className={styles.postTitle}>
+                          {nextPost?.data?.title}
+                        </p>
+                        <p className={styles.description}>Próximo post</p>
+                      </div>
+                    </a>
+                  </Link>
+                )}
+              </div>
+            </div>
+
+            <Comments />
           </div>
         </>
       )}
@@ -131,20 +177,33 @@ export const getStaticProps: GetStaticProps = async context => {
   const prismic = getPrismicClient();
   const res = await prismic.getByUID('posts', String(slug), {});
 
-  // console.log(res.data);
+  const nextResponse = await prismic.query(
+    // Replace `article` with your doc type
+    Prismic.Predicates.at('document.type', 'posts'),
+    {
+      pageSize: 1,
+      after: res?.id,
+      orderings: '[document.first_publication_date desc]',
+    }
+  );
+  const prevResponse = await prismic.query(
+    // Replace `article` with your doc type
+    Prismic.Predicates.at('document.type', 'posts'),
+    {
+      pageSize: 1,
+      after: res?.id,
+      orderings: '[document.first_publication_date]',
+    }
+  );
 
-  const content = res.data.content.map(content => {
-    // console.log(content);
-    // const body = content.body.map(body => {
-    //   // console.log(body);
-    //   const formattedText = { text: RichText.asHtml(body) };
+  const nextPost = nextResponse?.results[0] || null;
+  const prevPost = prevResponse?.results[0] || null;
 
-    //   return formattedText;
-    // });
-    const body = RichText.asHtml(content.body);
+  const content = res.data.content.map(contentItem => {
+    const body = RichText.asHtml(contentItem.body);
 
     const formattedContent = {
-      heading: content.heading,
+      heading: contentItem.heading,
       body,
     };
     return formattedContent;
@@ -165,6 +224,8 @@ export const getStaticProps: GetStaticProps = async context => {
   return {
     props: {
       post,
+      prevPost,
+      nextPost,
     },
     revalidate: 60 * 60 * 24,
   };
